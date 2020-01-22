@@ -1,0 +1,1176 @@
+\PassOptionsToPackage{table,usenames,dvipsnames,x11names}{xcolor}
+\documentclass[english,serif,mathserif]{beamer}
+\usetheme[informal]{gc3}
+
+\usepackage[T1]{fontenc}
+\usepackage[utf8]{inputenc}
+\usepackage{babel}
+
+\usepackage{gc3}
+
+\usepackage{colortbl}
+\makeatletter
+\rowcolors{1}{uzh@blue!10}{white}
+\makeatother
+
+\usepackage{dcolumn}
+\newcolumntype{d}[1]{D{.}{\cdot}{#1} }
+
+
+\begin{document}
+
+%% Optional Argument in [Brackets]: Short Title for Footline
+\title[Databases]{A Short Introduction to Relational Databases}
+\subtitle{Part 1}
+\author{Riccardo Murri \texttt{<riccardo.murri@uzh.ch>}}
+\date{2019-04-09}
+
+%% Makes the title slide
+\maketitle
+
+
+\begin{frame}
+  \centering
+
+  \+
+  {\Huge\itshape Databases}
+\end{frame}
+
+\begin{frame}
+  \centering
+
+  ``A \textbf{database} is an organized collection of data''
+
+  \uncover<2>{
+    \+
+    ``A \textbf{database management system} (DBMS) is a computer software application
+    \emph{[...]} A general-purpose DBMS is designed to allow the
+    definition, creation, querying, update, and administration of databases.''
+  }
+
+  \+
+  \begin{flushright}
+    --- \url{https://en.wikipedia.org/wiki/Database}
+  \end{flushright}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{\emph{Relational} DBs}
+
+  All major general purpose DBMS's are based on the so-called relational
+  data model.
+
+  \+ This means that all data is stored in a number of tables (with named
+  columns), such as:
+
+  \begin{center}
+    \small
+    \begin{tabular}{lll}
+      \textbf{usr}
+             & \textbf{size}
+                           & \textbf{path}                  \\
+      \hline
+      usr264 &          17 & /scratch/iftp/usr264/cp1.log   \\
+      usr116 & 19362662400 & /scratch/id/usr116/vkeller.tar \\
+      usr116 &     3379200 & /scratch/id/usr116/test.tar    \\
+      usr264 &          16 & /scratch/iftp/usr264/cp2.log   \\
+      usr345 &      877366 & /scratch/aim/usr345/bwa/bwa    \\
+    \end{tabular}
+  \end{center}
+
+  For historical and mathematical reasons such tables are referred to as
+  \emph{relations.}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{How are relational DBs programmed?}
+  The success of relational databases is largely due to the existence of
+  powerful programming languages for writing database queries.
+
+  \+ The most important such language is SQL (“Structured Query Language”,
+  sometimes pronounced “sequel”).
+
+  % \+ Important properties:
+  % \begin{itemize}
+  % \item \textbf{convenient}: queries can be written with little effort
+  % \item \textbf{efficient}: even for large data sets, a good DBMS can answer
+  %   queries written in SQL quickly (compared to the fastest possible)
+  % \end{itemize}
+\end{frame}
+
+
+\part{Relational data model}
+\begin{frame}[fragile]
+  \frametitle{Relational data  model}
+
+  \normalsize
+  A \textbf{relational database} is a set of relations.
+
+  \+
+  A \textbf{relation} is a set of tuples.
+
+  \+
+  A relation can be represented by listing all groups of related elements
+  --- the result is a ``table''.
+
+  \+
+  \small
+  \begin{center}
+    \begin{tabular}{lll}
+      \textbf{usr}
+             & \textbf{size}
+                           & \textbf{path}                  \\
+      \hline
+      usr264 &          17 & /scratch/iftp/usr264/cp1.log   \\
+      usr116 & 19362662400 & /scratch/id/usr116/vkeller.tar \\
+      usr116 &     3379200 & /scratch/id/usr116/test.tar    \\
+      usr264 &          16 & /scratch/iftp/usr264/cp2.log   \\
+      usr345 &      877366 & /scratch/aim/usr345/bwa/bwa    \\
+    \end{tabular}
+  \end{center}
+
+  \+
+  \smaller
+  Much of the material in these slides comes originally from:
+  {\em R.~Pagh, Introduction to Database Systems,
+    \url{http://www.itu.dk/people/pagh/IDB05/}}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{What is a tuple?}
+  \small
+
+  A relation consists of so-called tuples.
+
+  \+
+  A tuple is an \emph{ordered} list of values.
+
+  \+
+  Tuples are usually written in parentheses, with commas separating the
+  values (or components), e.g.:
+
+  \begin{quotation}
+    \texttt{(Star Wars, 1977, 124, color)}
+  \end{quotation}
+  which contains the four values \texttt{Star Wars}, \texttt{1977},
+  \texttt{124}, and \texttt{color}.
+
+  \+
+  \emph{Note:} Order is significant, e.g., the tuple \texttt{(Star Wars, 124, 1977,
+    color)} is different from the tuple above.
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{What is a relation?}
+  \small
+
+  A \textbf{relation} is a \emph{set} of tuples.
+
+  \+
+  A relation is always defined on certain sets (called \emph{domains}):
+  “the sets from which the values in the tuples come”.
+
+  \+
+  \emph{Example:} The tuple \texttt{(Star Wars, 1977, 124, color)} could be
+  part of a relation defined on the sets:
+  \begin{itemize}
+  \item All text strings,
+  \item the integers,
+  \item the integers, and
+  \item \{ \texttt{'color'}, \texttt{'black and white'} \}.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}
+  \frametitle{However\ldots}
+  \small
+
+  There are multiple domain sets to which tuple elements could belong.
+
+  \+
+  \uncover<1-2>{%
+    The tuple \texttt{(Star Wars, 1977, 124, color)} could be
+    part of a relation defined on the sets:
+    \begin{columns}[t]
+      \begin{column}{0.5\linewidth}
+        \begin{itemize}
+        \item All text strings,
+        \item the integers,
+        \item \alert<1>{the integers},
+        \item \alert<2>{\{ \texttt{'color'}, \texttt{'black~and~white'} \}}.
+        \end{itemize}
+      \end{column}
+      \begin{column}{0.5\linewidth}
+        \begin{itemize}
+        \item All text strings,
+        \item the integers,
+        \item \alert<1>{floating-point numbers},
+        \item \alert<2>{all text strings}.
+        \end{itemize}
+      \end{column}
+    \end{columns}
+  }%
+
+  \+
+  \uncover<3>{%
+    So the domains, over which the components of tuples (belonging
+    to a given relation) are allowed to vary, must be \emph{given}.
+    They are part of a relation's definition.
+  }%
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Attributes}
+  \small
+
+  In order to be able to refer to the different components in a tuple, we will
+  assign them names (called \textbf{attributes}).
+
+  \+ \emph{Example:} For the tuple \texttt{(Star Wars, 1977, 124, color)} we
+  might choose the attributes \texttt{title}, \texttt{year}, \texttt{length},
+  and \texttt{filmType}.
+
+  \+ Attribute \texttt{length} would then refer to the third value of the tuple,
+  \texttt{124}.
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{How do we write relations?}
+
+  Relations are usually written as two-dimensional tables, with the attributes
+  as a first, special row, and the tuples in the remaining rows.
+
+  \+
+  \small
+  \begin{center}
+    \begin{tabular}{lll}
+      \textbf{usr}
+             & \textbf{size}
+                           & \textbf{path}                  \\
+      \hline
+      usr264 &          17 & /scratch/iftp/usr264/cp1.log   \\
+      usr116 & 19362662400 & /scratch/id/usr116/vkeller.tar \\
+      usr116 &     3379200 & /scratch/id/usr116/test.tar    \\
+      usr264 &          16 & /scratch/iftp/usr264/cp2.log   \\
+      usr345 &      877366 & /scratch/aim/usr345/bwa/bwa    \\
+    \end{tabular}
+  \end{center}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Equivalent ways of writing relations}
+  The order of the rows does not matter \\ (just the \emph{set} of rows).
+
+  \+
+  \alert<2>{%
+    We may freely reorder the columns, \\
+    \emph{provided we reorder attributes accordingly.}
+  }%
+
+  \+
+  \uncover<2>{%
+    \smaller
+    (This effectively makes tuples a function from the set of attributes into
+    the domains.  Defining tuples as ordered list of values was just a
+    preliminary step to get here.)
+  }%
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Recap: A formal definition}
+  \small
+
+  Let $A$ be a finite set.  It is the set of \emph{attributes}.
+
+  \+
+  Let $D: A \to \mathbf{Set}$ be a map from $A$ into the set of (finite) sets,
+  i.e., for every $a \in A$ we are given a finite set $D_a$ the \emph{domain} of
+  attribute $a$.  $D$ is the relation \emph{schema}.
+
+  \+
+  A \emph{tuple} is an element of the product set $\Pi_{a \in A}D_a$, i.e., the choice,
+  for every $a \in A$, of an element $t(a) \in D_a$.
+
+  \+
+  A \emph{relation} is a set of tuples, i.e., a subset of $\Pi_{a \in A}D_a$.
+
+  \+
+  A (relational) \emph{database} is a set of relations.
+\end{frame}
+
+
+\part{Basic SQL}
+
+\begin{frame}
+  \frametitle{Naming of parts}
+
+  \centering
+  \begin{tabular}{rcl}
+    \textbf{Rel. Algebra} &$\Leftrightarrow$& \textbf{SQL DBMS} \\
+    \hline
+    attributes            && fields, column names \\
+    domain                && column type \\
+    relation              && table, view${}^{\,*}$
+    \\
+    tuple                 && row, record \\
+  \end{tabular}
+
+  \+
+  \smaller
+  \raggedright
+  \begin{description}
+  \item[*] {%
+    There is a difference between ``table'' and ``view'' in SQL,
+    to be explained later.}
+  \end{description}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{The SQL \texttt{SELECT} statement}
+  \smaller
+
+  \begin{columns}
+    \begin{column}{0.5\linewidth}
+\begin{sql}
+db=> SELECT 'hello, world!';
+   ?column?
+~-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}~
+ hello, world!
+(1 row)
+\end{sql}
+    \end{column}
+    \begin{column}{0.5\linewidth}
+      The \texttt{SELECT} statement is used to compute expressions in SQL.
+
+      \+ \alert<2>{The result of evaluating a \texttt{SELECT} statement is again a
+      \emph{relation} (table).}
+
+      \+
+      \only<2>{\textbf{Why is this important?}}
+      \only<3>{%
+        \alert<3>{%
+          It allows \emph{composition} of queries into larger expressions.
+        }%
+      }%
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{What is an algebra?}
+  An algebra consists of a set of \textbf{atomic operands}, \\
+  and a set of \textbf{operators}.
+
+  \+
+  We can form algebraic expressions by applying operators to operands
+  \alert{(which can be atomic or expressions themselves)}.
+
+  \+
+  For this to work, the result of applying an operator to an expression must be
+  again an operand.  In other words, an algebra must be \emph{closed} under all
+  given operations.
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{What is \emph{relational} algebra?}
+
+  Relational algebra, defined in its basic form by E.~F.~Codd in 1970, has:
+  \begin{itemize}
+  \item relations as atomic operands, and
+  \item various operations on relations as operators (which will be detailed shortly).
+  \end{itemize}
+
+  \+
+  Relational algebra is the basis of SQL.
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Basic SQL syntax}
+  \smaller
+
+  \begin{columns}
+    \begin{column}{0.5\linewidth}
+\begin{sql}
+db=> SELECT ~\HL{'hello, world!'}~;
+   ?column?
+~-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}~
+ hello, world!
+(1 row)
+\end{sql}
+    \end{column}
+    \begin{column}{0.5\linewidth}
+    Strings in SQL are delimited by \emph{single} quotes.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{The SQL \texttt{SELECT} statement}
+  \smaller
+
+  \begin{columns}
+    \begin{column}{0.5\linewidth}
+\begin{sql}
+db=> SELECT 'hello, world!';
+   ~\HL{?column?}~
+~-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}~
+ hello, world!
+(1 row)
+\end{sql}
+    \end{column}
+    \begin{column}{0.5\linewidth}
+    Columns in a table must have a name, so the DBMS makes up one.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{The SQL \texttt{SELECT} statement}
+  \smaller
+
+  \begin{columns}
+    \begin{column}{0.5\linewidth}
+\begin{sql}
+db=> SELECT 'hello, world!'
+db->        AS text  ;
+   ~\HL{text}~
+~-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}~
+ hello, world!
+(1 row)
+\end{sql}
+    \end{column}
+    \begin{column}{0.5\linewidth}
+    A column name can be given with the \texttt{AS} clause.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{The SQL \texttt{SELECT} statement}
+  \smaller
+
+  \begin{columns}
+    \begin{column}{0.5\linewidth}
+\begin{sql}
+db=> SELECT 'foo'~\HL{,}~ 'bar';
+ ?column? | ?column?
+~-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}~
+ foo      | bar
+(1 row)
+\end{sql}
+    \end{column}
+    \begin{column}{0.5\linewidth}
+      Multiple expressions can be evaluated by separating them with a comma.
+
+      \+ They define different columns in the result table.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{\texttt{NULL} and \texttt{UNKNOWN}}
+  \texttt{NULL} is a special value that may be used for any data type when no other
+  value is applicable.
+
+  \+
+  Evaluating expressions involving \texttt{NULL}:
+  \begin{itemize}
+  \item Arithmetic expressions involving \texttt{NULL} evaluate to
+    \texttt{NULL}.
+  \item Boolean expressions evaluate to \texttt{NULL} only when the
+    correct value cannot be deduced.
+  \end{itemize}
+
+  \+ Some RDBMSs support a special null value for booleans called
+  \texttt{UNKNOWN}.
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Selection}
+
+  \texttt{SELECT ... FROM ... WHERE} returns a relation of all rows in a table
+  that satisfy a certain predicate.
+
+  \+
+\begin{sql}[basicstyle=\ttfamily\tiny]
+db=> SELECT *
+db-> FROM lustre
+db-> WHERE usr='usr116';
+  usr   |~\ldots~|   ~\tt size~    | path
+~-{}-{}-{}-{}-{}-{}-{}-{}+{}-{}-{}-{}+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}~
+ usr116 |~\ldots~| 256958166 | /scratch/id/usr116/pic_babo.tgz
+ usr116 |~\ldots~|   2101760 | /scratch/id/usr116/testib.tar
+ ~{\em [\ldots]}~
+\end{sql}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Selection}
+
+  \texttt{SELECT ... FROM ... WHERE} returns a relation of all rows in a table
+  that satisfy a certain predicate.
+
+  \+
+\begin{sql}[basicstyle=\ttfamily\tiny]
+db=> SELECT ~\HL{*}~
+db-> FROM lustre
+db-> WHERE usr='usr116';
+  usr   |~\ldots~|   ~\tt size~    | path
+~-{}-{}-{}-{}-{}-{}-{}-{}+{}-{}-{}-{}+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}~
+ usr116 |~\ldots~| 256958166 | /scratch/id/usr116/pic_babo.tgz
+ usr116 |~\ldots~|   2101760 | /scratch/id/usr116/testib.tar
+ ~{\em [\ldots]}~
+\end{sql}
+
+  \texttt{*} is a shorthand for ``all column names''.
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Selection}
+
+  \texttt{SELECT ... FROM ... WHERE} returns a relation of all rows in a table
+  that satisfy a certain predicate.
+
+  \+
+\begin{sql}[basicstyle=\ttfamily\tiny]
+db=> SELECT *
+db-> FROM ~\HL{lustre}~
+db-> WHERE usr='usr116';
+  usr   |~\ldots~|   ~\tt size~    | path
+~-{}-{}-{}-{}-{}-{}-{}-{}+{}-{}-{}-{}+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}~
+ usr116 |~\ldots~| 256958166 | /scratch/id/usr116/pic_babo.tgz
+ usr116 |~\ldots~|   2101760 | /scratch/id/usr116/testib.tar
+ ~{\em [\ldots]}~
+\end{sql}
+
+\texttt{FROM} indicates the table from which to extract rows.
+
+\+ Each table in a SQL database is given a name (at creation time).
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Selection}
+
+  \texttt{SELECT ... FROM ... WHERE} returns a relation of all rows in a table
+  that satisfy a certain predicate.
+
+  \+
+\begin{sql}[basicstyle=\ttfamily\tiny]
+db=> SELECT *
+db-> FROM lustre
+db-> WHERE ~\HL{usr='usr116'}~;
+  usr   |~\ldots~|   ~\tt size~    | path
+~-{}-{}-{}-{}-{}-{}-{}-{}+{}-{}-{}-{}+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}~
+ usr116 |~\ldots~| 256958166 | /scratch/id/usr116/pic_babo.tgz
+ usr116 |~\ldots~|   2101760 | /scratch/id/usr116/testib.tar
+ ~{\em [\ldots]}~
+\end{sql}
+
+The \texttt{WHERE} clause specifies the predicate that selected rows must
+satisfy.
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Selection}
+
+  \texttt{SELECT ... FROM ... WHERE} returns a relation of all rows in a table
+  that satisfy a certain predicate
+
+  \+
+\begin{sql}[basicstyle=\ttfamily\tiny]
+db=> SELECT *
+db-> FROM lustre
+db-> WHERE ~\HL{usr}~='usr116';
+  usr   |~\ldots~|   ~\tt size~    | path
+~-{}-{}-{}-{}-{}-{}-{}-{}+{}-{}-{}-{}+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}~
+ usr116 |~\ldots~| 256958166 | /scratch/id/usr116/pic_babo.tgz
+ usr116 |~\ldots~|   2101760 | /scratch/id/usr116/testib.tar
+ ~{\em [\ldots]}~
+\end{sql}
+
+The \texttt{WHERE} clause specifies the predicate that selected rows must
+satisfy.
+
+\+ Column names are used in predicate expression to denote the value of the
+corresponding attribute value in a tuple.
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Selection}
+
+  \texttt{SELECT ... FROM ... WHERE} returns a relation of all rows in a table
+  that satisfy a certain predicate
+
+  \+
+\begin{sql}[basicstyle=\ttfamily\tiny]
+db=> SELECT *
+db-> FROM lustre
+db-> WHERE usr~\HL{=}~'usr116';
+  usr   |~\ldots~|   ~\tt size~    | path
+~-{}-{}-{}-{}-{}-{}-{}-{}+{}-{}-{}-{}+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}~
+ usr116 |~\ldots~| 256958166 | /scratch/id/usr116/pic_babo.tgz
+ usr116 |~\ldots~|   2101760 | /scratch/id/usr116/testib.tar
+ ~{\em [\ldots]}~
+\end{sql}
+
+The \texttt{WHERE} clause specifies the predicate that selected rows must
+satisfy.
+
+\+
+If the \texttt{WHERE} clause is omitted, all rows are selected.
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Predicates in \texttt{WHERE} clauses}
+  SQL offers a variety of ways of forming conditional expressions in
+  \texttt{WHERE} clauses:
+
+  \+
+  \begin{itemize}
+  \item Comparison operators (used between e.g. a pair of integers or strings):
+    \texttt{=}, \texttt{<}, \texttt{<=}, \texttt{>}, \texttt{>=}, \texttt{<>}.
+  \item Boolean operators (used to combine conditional expressions):
+    \texttt{AND}, \texttt{OR}, \texttt{NOT}.
+  \item The \texttt{LIKE} operator used to find strings that match a given
+    pattern.
+  \item Parentheses can be used to indicate the order of evaluation. If no
+    parentheses are present, a standard order is used.
+  \end{itemize}
+\end{frame}
+
+\begin{frame}[fragile]
+  \frametitle{Selection}
+
+  \texttt{SELECT ... FROM ... WHERE} returns a relation of all rows in a table
+  that satisfy a certain predicate
+
+  \+
+\begin{sql}[basicstyle=\ttfamily\tiny]
+db=> SELECT *
+db-> FROM lustre
+db-> WHERE ~\HL{LENGTH(path)}~<32;
+  usr   |~\ldots~|   ~\tt size~    | path
+~-{}-{}-{}-{}-{}-{}-{}-{}+{}-{}-{}-{}+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}~
+ usr116 |~\ldots~| 256958166 | /scratch/id/usr116/pic_babo.tgz
+ usr116 |~\ldots~|   2101760 | /scratch/id/usr116/testib.tar
+ ~{\em [\ldots]}~
+\end{sql}
+
+The \texttt{WHERE} clause specifies the predicate that selected rows must
+satisfy.
+
+\+ Functions can be applied to column values.
+
+\+ RDBMS provide some built-in functions but generally let users also define
+their own (UDF).
+\end{frame}
+
+
+% \begin{frame}[fragile]
+%   \frametitle{Selection}
+
+%   \texttt{SELECT ... FROM ... WHERE} returns a relation of all rows in a table
+%   that satisfy a certain predicate
+
+%   \+
+% \begin{sql}[basicstyle=\ttfamily\tiny]
+% db=> SELECT *
+% db-> FROM lustre
+% db-> WHERE usr='usr116';
+%   usr   |~\ldots~|   ~\tt size~    | path
+% --------+--------+-----------+-------------------------------------------------------------------
+%  usr116 |~\ldots~| 256958166 | /scratch/id/usr116/pic_babo.tgz
+%  usr116 |~\ldots~|   2101760 | /scratch/id/usr116/testib.tar
+%  ~{\em [\ldots]}~
+% \end{sql}
+
+% The \texttt{WHERE} clause specifies the predicate that selected rows must
+% satisfy.
+% \end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Projection}
+
+  A list of column names or expressions can be given to \texttt{SELECT}; the
+  resulting relation will contain only the specified columns.
+
+  \+
+\begin{sql}[basicstyle=\ttfamily\tiny]
+db=> SELECT ~\HL{usr, size, path}~
+db-> FROM lustre;
+  usr  |  ~\tt size~  |              path
+~-{}-{}-{}-{}-{}-{}-{}+{}-{}-{}-{}-{}-{}-{}-{}-{}+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}~
+ us345 |    100 | /scratch/aim/bin/run_fastqc.bat
+ us345 | 507539 | /scratch/aim/bin/sam-1.32.jar
+ ~{\em [\ldots]}~
+\end{sql}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{\emph{Set} vs. \emph{Bag} semantics}
+
+  A list of column names or expressions can be given to \texttt{SELECT}; the
+  resulting relation will contain only the specified columns.
+
+  \+
+\begin{sql}[basicstyle=\ttfamily\tiny]
+db=> SELECT usr
+db-> FROM lustre;
+  usr
+~-{}-{}-{}-{}-{}-{}-{}~
+ ~\HL{usr345}~
+ ~\HL{usr345}~
+ ~\HL{usr345}~
+ ~{\em [\ldots]}~
+\end{sql}
+
+  However, \alert{selecting a subset of attributes may lead to \emph{non-unique} tuples.}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{\emph{Set} vs. \emph{Bag} semantics}
+
+  SQL defines a relation as a \emph{list} of tuples, \\ i.e., an
+  ordered sequence of rows, \\ allowing identical tuples to appear.
+
+  \+ The reason is \emph{efficiency}: eliminating duplicates is
+  (computationally) costly, so is only done at the programmers' request.
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{DISTINCT}
+
+  The \texttt{DISTINCT} modifier is used to force removal of duplicate values in
+  an expression:
+
+  \+
+\begin{sql}[basicstyle=\ttfamily\tiny]
+db=> SELECT DISTINCT usr
+db-> FROM lustre;
+  usr
+~-{}-{}-{}-{}-{}-{}-{}~
+ ~\HL{usr345}~
+ ~\HL{usr116}~
+ ~{\em [\ldots]}~
+\end{sql}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Keys}
+
+  A subset $A$ of the attributes of relation $R$ such that there are no
+  duplicates when $R$ is projected upon $A$ is called a \textbf{key}.
+
+\begin{sql}
+db=> SELECT path FROM lustre;
+ ~{\em [\ldots]}~
+~\HL{(30356776 rows)}~
+
+db=> SELECT DISTINCT path FROM lustre;
+ ~{\em [\ldots]}~
+~\HL{(30356776 rows)}~
+\end{sql}
+
+\end{frame}
+
+\begin{frame}
+  \frametitle{Keys}
+
+  A subset $A$ of the attributes of relation $R$ such that there are no
+  duplicates when $R$ is projected upon $A$ is called a \textbf{key}.
+
+  \+
+  \alert{The uniqueness constraints of the key must hold however the
+  relation is updated and modified.}  \\ In other words, a key constraint
+  is an existential attribute of the relation, not just an accident of
+  the data.
+
+  \+
+  So, key constraints are specified when the table is created.
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Ordered relations, again}
+
+  SQL defines a relation as a \emph{list} of tuples, i.e., an ordered
+  sequence of rows, allowing identical tuples to appear.
+
+  \+ Can you think of another reason why SQL defines a relation as an
+  \emph{ordered} sequence?
+
+  \+
+  (Answer on next slide.)
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Sorting}
+  An additional clause \texttt{ORDER BY} allows sorting on an arbitrary
+  expression of the attribute values.
+
+  \+
+  \begin{columns}
+    \begin{column}{0.5\linewidth}
+\begin{sql}
+db=> SELECT DISTINCT usr
+db-> FROM lustre
+db-> ~\HL{ORDER BY}~ usr ASC
+db-> LIMIT 3;
+  usr
+~-{}-{}-{}-{}-{}-{}-{}~
+ us293
+ us319
+ us320
+(3 rows)
+\end{sql}
+    \end{column}
+    \begin{column}{0.5\linewidth}
+
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Sorting}
+  An additional clause \texttt{ORDER BY} allows sorting on an arbitrary
+  expression of the attribute values.
+
+  \+
+  \begin{columns}
+    \begin{column}{0.5\linewidth}
+\begin{sql}
+db=> SELECT DISTINCT usr
+db-> FROM lustre
+db-> ORDER BY ~\HL{usr}~ ASC
+db-> LIMIT 3;
+  usr
+~-{}-{}-{}-{}-{}-{}-{}~
+ us293
+ us319
+ us320
+(3 rows)
+\end{sql}
+    \end{column}
+    \begin{column}{0.5\linewidth}
+      Any valid expression can be used as a sorting key!
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Sorting}
+  An additional clause \texttt{ORDER BY} allows sorting on an arbitrary
+  expression of the attribute values.
+
+  \+
+  \begin{columns}
+    \begin{column}{0.5\linewidth}
+\begin{sql}
+db=> SELECT DISTINCT usr
+db-> FROM lustre
+db-> ORDER BY usr ~\HL{ASC}~
+db-> LIMIT 3;
+  usr
+~-{}-{}-{}-{}-{}-{}-{}~
+ us293
+ us319
+ us320
+(3 rows)
+\end{sql}
+    \end{column}
+    \begin{column}{0.5\linewidth}
+      Specify \textbf{ascending} sort order.
+
+      \+ Use \texttt{DESC} for the opposite ordering.
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Aside: LIMIT}
+  An additional clause \texttt{LIMIT} allows specifying a maximum size
+  of the result set.  It can be applied to \emph{any} SQL query.
+
+  \+
+  \begin{columns}
+    \begin{column}{0.5\linewidth}
+\begin{sql}
+db=> SELECT DISTINCT usr
+db-> FROM lustre
+db-> ORDER BY usr ASC
+db-> ~\HL{LIMIT 3}~;
+  usr
+~-{}-{}-{}-{}-{}-{}-{}~
+ us293
+ us319
+ us320
+(3 rows)
+\end{sql}
+    \end{column}
+    \begin{column}{0.5\linewidth}
+
+    \end{column}
+  \end{columns}
+\end{frame}
+
+
+% \begin{frame}[fragile]
+%   \frametitle{Sorting}
+%   An additional clause \texttt{ORDER BY} allows sorting on an arbitrary
+%   expression of the attribute values.
+
+%   \+
+%   \begin{columns}
+%     \begin{column}{0.5\linewidth}
+% \begin{sql}
+% db=> SELECT DISTINCT usr
+% db-> FROM lustre
+% db-> ORDER BY size ASC
+% db-> LIMIT 3;
+%   usr
+% -------
+%  us293
+%  us319
+%  us320
+% (3 rows)
+% \end{sql}
+%     \end{column}
+%     \begin{column}{0.5\linewidth}
+
+%     \end{column}
+%   \end{columns}
+% \end{frame}
+
+
+\part{Aggregate functions}
+
+\begin{frame}[fragile]
+  \frametitle{Computing on aggregates}
+
+  Some functions by definition operate on a group of rows and return a single
+  value out of the group:
+
+  \+
+  \begin{sql}
+db=> SELECT AVG(size) FROM lustre;
+         avg
+~-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}~
+ 4815351.200747734213
+
+db=> SELECT MAX(size) FROM lustre;
+     max
+~-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}~
+  354519221688
+
+db=> SELECT COUNT(*) FROM lustre;
+  count
+~-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}~
+ 30356776
+\end{sql}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Computing on aggregates}
+
+  By default, aggregation is over all selected rows.
+
+  \+
+  A \texttt{GROUP BY} clause can be used to specify how rows should be grouped;
+  expressions involving aggregate functions will be computed once per each group.
+
+  \+
+  \begin{sql}
+ db=> SELECT usr, MAX(size)
+ db-> FROM lustre
+ db-> GROUP BY usr;
+  usr   |     max
+~-{}-{}-{}-{}-{}-{}-{}-{}+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}~
+ usr25  | 354519221688
+ usr324 |   3026168420
+ usr234 |   2038075132
+ ~{\ldots}~
+\end{sql}
+
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Computing on aggregates}
+
+  An additional \texttt{HAVING} clause applies a predicate to further select
+  groups based on some expression.
+
+  \+
+  For example, compute average file size per user, but only consider users that
+  have at least 10000 files on the system:
+  \begin{sql}
+ db=> SELECT usr, AVG(size)
+ db-> FROM lustre
+ db-> GROUP BY usr
+ db-> ~\HL{HAVING COUNT(path)>10000}~;
+  usr   |          avg
+~-{}-{}-{}-{}-{}-{}-{}-{}+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}~
+ usr25  | 19942289.171742225897
+ usr324 |  1891531.025947844280
+ usr234 |  1443121.015355730924
+ ~{\ldots}~
+\end{sql}
+\end{frame}
+
+
+\begin{frame}[fragile]
+  \frametitle{Computing on aggregates}
+
+  For example, compute average file size per user, but only consider users that
+  have at least 10000 files on the system:
+  \begin{sql}
+ db=> SELECT usr, AVG(size)
+ db-> FROM lustre
+ db-> GROUP BY usr
+ db-> ~\HL{HAVING COUNT(path)>10000}~;
+  usr   |          avg
+~-{}-{}-{}-{}-{}-{}-{}-{}+{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}-{}~
+ usr25  | 19942289.171742225897
+ usr324 |  1891531.025947844280
+ usr234 |  1443121.015355730924
+ ~{\ldots}~
+\end{sql}
+
+  \+
+  \alert{Could this be done with a \texttt{WHERE} clause?  Why?}
+\end{frame}
+
+
+\part{Subqueries}
+\begin{frame}[fragile]
+  \frametitle{Subqueries}
+  \small
+
+  Until now, we have seen SQL queries of the form:
+\begin{semiverbatim}
+SELECT \emph{list of attributes}
+FROM \emph{list of relations}
+WHERE \emph{condition};
+\end{semiverbatim}
+
+  \+
+  What we haven’t used is that:
+  \begin{itemize}
+  \item In any place where a relation is allowed, we may put an SQL query (a
+    subquery) computing a relation.
+  \item In any place where an “atomic value” (e.g. string or integer) is
+    allowed, we may put an SQL subquery computing a relation with one value of
+    this type (i.e., having one attribute and one tuple).
+  \end{itemize}
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Subqueries in the \texttt{FROM} clause}
+  Instead of just relations, we may use SQL queries in the \texttt{FROM} clause of
+  a \texttt{SELECT} statement.
+
+  \+
+  If we need a name for referring to the relation computed by the subquery, an
+  additional \texttt{AS \emph{name}} is appended after the subquery.
+  This allows us to use values from the subquery results in other expressions.
+
+  \+
+  Subqueries should always be surrounded by parentheses.
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Subqueries producing scalar values}
+
+  When a query produces a relation with one attribute and one tuple, it can
+  be used in any place where we can put an atomic (or scalar) value.
+
+  \+ In places where an atomic value is expected, SQL regards a relation
+  instance containing one atomic value
+  $x$ to be the same as the value $x$.
+
+  \+
+  If such a subquery does not result in exactly one tuple, it is a run-time
+  error, and the SQL query cannot be completed.
+\end{frame}
+
+
+\begin{frame}
+  \frametitle{Subqueries in conditions}
+  \small
+
+  One common use of subqueries is in the \texttt{WHERE} part of
+  a \texttt{SELECT} statememt.
+
+  \+ There are several operators in SQL that apply to a
+  relation~$S$, result of a subquery, and produce a boolean result:
+  \begin{itemize}
+  \item \HL{\texttt{EXISTS} $S$} is true if and only if $S$ is not empty.
+  \item \HL{$t$ \texttt{IN} $S$} is true if and only if $t$ is a tuple in $S$.
+  \end{itemize}
+
+  \+ If $S$ is unary (has just one attribute):
+  \begin{itemize}
+  \item \HL{\texttt{$x$ > ALL $S$}} is true if and only if $x$ is greater than all
+    values in $S$.
+  \item \HL{\texttt{$x$ > ANY $S$}} is true if and only if $x$ is greater
+    than some value in $S$
+  \end{itemize}
+  (and similarly for other comparison operators).
+\end{frame}
+
+
+\part{Appendix}
+\begin{frame}
+  \frametitle{References}
+
+  Pagh, R.: ``Introduction to Database Systems'',
+  \url{http://www.itu.dk/people/pagh/IDB05/}
+
+  \+
+  Codd, E.~F.: ``A relational model for large shared data banks'', \emph{Comm.
+  ACM} 13:6, pp.~377--387, 1970
+\end{frame}
+
+
+\end{document}
+
+
+%%% Local Variables:
+%%% mode: latex
+%%% TeX-master: t
+%%% End:
